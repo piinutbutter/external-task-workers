@@ -1,8 +1,5 @@
 package de.htw_berlin.fb4.mas.worker;
 
-import com.fasterxml.jackson.core.SerializableString;
-import com.fasterxml.jackson.core.io.CharacterEscapes;
-import com.fasterxml.jackson.core.io.SerializedString;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -247,29 +244,5 @@ public class RunUiPathRobot implements ExternalTaskHandler {
                 .map(Path::toAbsolutePath)
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Could not locate UiRobot.exe in " + installationFolders));
-    }
-
-    private static class SingleQuoteCharacterEscapes extends CharacterEscapes {
-
-        private final int[] asciiEscapes;
-
-        public SingleQuoteCharacterEscapes() {
-            asciiEscapes = CharacterEscapes.standardAsciiEscapesForJSON();
-            asciiEscapes['"'] = CharacterEscapes.ESCAPE_CUSTOM;
-            asciiEscapes['\''] = CharacterEscapes.ESCAPE_STANDARD;
-        }
-
-        @Override
-        public int[] getEscapeCodesForAscii() {
-            return asciiEscapes;
-        }
-
-        @Override
-        public SerializableString getEscapeSequence(int ch) {
-            if (ch == '"') {
-                return new SerializedString("'");
-            }
-            return null;
-        }
     }
 }
