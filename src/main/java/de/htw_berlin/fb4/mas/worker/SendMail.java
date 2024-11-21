@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
+import static jakarta.mail.Message.RecipientType.CC;
 import static jakarta.mail.Message.RecipientType.TO;
 
 /**
@@ -34,6 +35,7 @@ import static jakarta.mail.Message.RecipientType.TO;
  * <ul>
  *     <li>from = sales@example.org</li>
  *     <li>to = ${customer_mail_address}</li>
+ *     <li>cc = ${sales_mail_address}</li>
  *     <li>subject = Auftragsbestätigung</li>
  *     <li>body = Sehr geehrte Damen und Herren, hiermit bestätigen wir Ihnen Auftrag ${auftragsnummer}.</li>
  * </ul>
@@ -73,12 +75,13 @@ public class SendMail implements ExternalTaskHandler {
 
         String from = externalTask.getVariable("from");
         String to = externalTask.getVariable("to");
+        String cc = externalTask.getVariable("cc");
         String subject = externalTask.getVariable("subject");
         String body = externalTask.getVariable("body");
 
         try {
-            log.info("Sending mail with subject '{}' to '{}'", subject, to);
-            sendMail(from, to, subject, body);
+            log.info("Sending mail with subject '{}' to '{}'{}", subject, to, cc != null ? " (cc: '" + cc + "')" : "");
+            sendMail(from, to, cc, subject, body);
 
             externalTaskService.complete(externalTask);
         } catch (MessagingException e) {
@@ -86,12 +89,15 @@ public class SendMail implements ExternalTaskHandler {
         }
     }
 
-    private void sendMail(String from, String to, String subject, String body) throws MessagingException {
+    private void sendMail(String from, String to, String cc, String subject, String body) throws MessagingException {
         Session session = createSession();
 
         Message message = new MimeMessage(session);
         message.setFrom(new InternetAddress(from));
         message.setRecipients(TO, InternetAddress.parse(to));
+        if (cc != null) {
+            message.setRecipients(CC, InternetAddress.parse(cc));
+        }
         message.setSubject(subject);
         message.setText(body);
 
