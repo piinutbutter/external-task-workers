@@ -14,8 +14,11 @@ import org.camunda.bpm.client.task.ExternalTaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
 
 import static jakarta.mail.Message.RecipientType.TO;
@@ -34,18 +37,35 @@ import static jakarta.mail.Message.RecipientType.TO;
  *     <li>subject = Auftragsbestätigung</li>
  *     <li>body = Sehr geehrte Damen und Herren, hiermit bestätigen wir Ihnen Auftrag ${auftragsnummer}.</li>
  * </ul>
+ * <p>
+ * Die Konfiguration erfolgt über die Datei mail.properties, die sich im Ausführungsverzeichnis befinden muss.
+ * Beim Start aus der IDE ist es das Verzeichnis, das die Datei pom.xml enthält.
+ * Die Datei mail.properties muss folgende Einstellungen enthalten:
+ * <ul>
+ *     <li>mail.smtp.host</li>
+ *     <li>mail.smtp.port</li>
+ *     <li>mail.smtp.auth.user</li>
+ *     <li>mail.smtp.auth.password</li>
+ * </ul>
  */
 public class SendMail implements ExternalTaskHandler {
 
     private static final Logger log = LoggerFactory.getLogger(SendMail.class);
 
-    private static final String smtpHost = "mail.htw-berlin.de";
+    private final Properties mailProperties;
 
-    private static final int smtpPort = 25;
+    public SendMail() {
+        mailProperties = new Properties();
+        try (InputStream inputStream = Files.newInputStream(Path.of("mail.properties").toAbsolutePath())) {
+            mailProperties.load(inputStream);
+        } catch (Exception e) {
+            throw new RuntimeException("Einstellungen zum Versenden von Mails konnten nicht geladen werden", e);
+        }
 
-    private static final String smtpUser = "s0xxxxxx";
-
-    private static final String smtpPassword = "geheim";
+        mailProperties.put("mail.smtp.auth", true);
+        mailProperties.put("mail.smtp.starttls.enable", "true");
+        mailProperties.put("mail.smtp.ssl.trust", mailProperties.getProperty("mail.smtp.host"));
+    }
 
     @Override
     public void execute(ExternalTask externalTask, ExternalTaskService externalTaskService) {
@@ -78,18 +98,11 @@ public class SendMail implements ExternalTaskHandler {
         Transport.send(message);
     }
 
-    private static Session createSession() {
-        Properties mailProperties = new Properties();
-        mailProperties.put("mail.smtp.auth", true);
-        mailProperties.put("mail.smtp.starttls.enable", "true");
-        mailProperties.put("mail.smtp.host", smtpHost);
-        mailProperties.put("mail.smtp.port", smtpPort);
-        mailProperties.put("mail.smtp.ssl.trust", smtpHost);
-
+    private Session createSession() {
         return Session.getInstance(mailProperties, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(smtpUser, smtpPassword);
+                return new PasswordAuthentication(mailProperties.getProperty("mail.smtp.auth.user"), mailProperties.getProperty("mail.smtp.auth.password"));
             }
         });
     }
