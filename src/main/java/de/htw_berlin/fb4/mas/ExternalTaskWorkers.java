@@ -1,6 +1,7 @@
 package de.htw_berlin.fb4.mas;
 
 import de.htw_berlin.fb4.mas.worker.PrintVariables;
+import de.htw_berlin.fb4.mas.worker.SendMail;
 import org.camunda.bpm.client.ExternalTaskClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,7 @@ public class ExternalTaskWorkers {
                 .build();
 
         client.subscribe("print-variables").handler(new PrintVariables()).open();
+        client.subscribe("send-mail").handler(new SendMail()).open();
 
         log.info("ExternalTaskWorkers started");
     }
