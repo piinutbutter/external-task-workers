@@ -1,6 +1,8 @@
 package de.htw_berlin.fb4.mas;
 
+import de.htw_berlin.fb4.mas.worker.PenetrationTest;
 import de.htw_berlin.fb4.mas.worker.PrintVariables;
+import de.htw_berlin.fb4.mas.worker.RunUiPathRobot;
 import de.htw_berlin.fb4.mas.worker.SendMail;
 import org.camunda.bpm.client.ExternalTaskClient;
 import org.slf4j.Logger;
@@ -20,7 +22,10 @@ public class ExternalTaskWorkers {
 
         client.subscribe("print-variables").handler(new PrintVariables()).open();
         client.subscribe("send-mail").handler(new SendMail()).open();
-
+        client.subscribe("penetration-test").handler(new PenetrationTest()).open();
+        client.subscribe("RPA-Zielgruppe")
+                .handler(new RunUiPathRobot("\"C:\\Users\\phili\\OneDrive\\Dokumente\\Uni\\modellierung\\projekt\\ZielgruppeErmitteln.1.0.1.nupkg\""))
+                .open();
         log.info("ExternalTaskWorkers started");
     }
 }
