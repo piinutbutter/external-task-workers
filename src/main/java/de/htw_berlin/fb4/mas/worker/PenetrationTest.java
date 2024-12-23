@@ -48,8 +48,7 @@ public class PenetrationTest implements ExternalTaskHandler {
             log.info("Penetration test completed successfully. Result: {}", testResult);
 
             // Ergebnis in den Prozess zurückschreiben
-            externalTaskService.complete(externalTask,
-                    Map.of("penetrationTestResult", testResult));
+            externalTaskService.complete(externalTask);
         } catch (IOException e) {
             handleFailure(externalTask, externalTaskService, e);
         }
