@@ -24,7 +24,7 @@ public class ExternalTaskWorkers {
         client.subscribe("print-variables").handler(new PrintVariables()).open();
         client.subscribe("send-mail").handler(new SendMail()).open();
         client.subscribe("RPA-Zielgruppe")
-                .handler(new RunUiPathRobot(Path.of("C:\\Users\\phili\\OneDrive\\Dokumente\\Uni\\modellierung\\projekt\\ZielgruppeErmitteln.1.0.1.nupkg")))
+                .handler(new RunUiPathRobot(Path.of("C:\\Users\\phili\\Documents\\ZielgruppeErmitteln.1.0.1.nupkg")))
                 .open();
         log.info("ExternalTaskWorkers started");
     }
